@@ -82,7 +82,7 @@ Gaussian Membership Function. Gaussian function can change based on the requirem
 """
 
 
-def gauss(x, m, s):
+def gaussian(x, m, s):
     return np.exp(-((x - m) ** 2) / s**2)
 
 
