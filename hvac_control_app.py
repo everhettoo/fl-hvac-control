@@ -103,6 +103,11 @@ def defuzzify(universe, aggregated):
         return 0.0
     return np.sum(universe * aggregated) / np.sum(aggregated)
 
+def dominant_category(name, memberships):
+    # memberships is a dict {category: value}
+    dominant = max(memberships, key=memberships.get)
+    print(f"{name} Category: {dominant} (μ={memberships[dominant]:.2f})")
+    return dominant
 
 if __name__ == "__main__":
     print("HVAC Control System using Fuzzy Logic")
@@ -122,6 +127,28 @@ if __name__ == "__main__":
     fuzzify_humid(in_humid)
     fuzzify_co2(in_co2)
 
+    # Collect memberships
+    temp_memberships = {
+        "Cold": in_cold_temp,
+        "Comfortable": in_comfortable_temp,
+        "Warm": in_warm_temp
+    }
+    humid_memberships = {
+        "Dry": in_dry_humid,
+        "Normal": in_normal_humid,
+        "High": in_high_humid
+    }
+    co2_memberships = {
+        "Low": in_low_co2,
+        "Medium": in_medium_co2,
+        "High": in_high_co2
+    }
+
+    # Show dominant categories
+    temp_cat = dominant_category("Temperature", temp_memberships)
+    humid_cat = dominant_category("Humidity", humid_memberships)
+    co2_cat = dominant_category("CO₂", co2_memberships)
+
     # Rules Evaluation
     aggregated = evaluate_rules()
 
@@ -129,3 +156,15 @@ if __name__ == "__main__":
     cooling_level = defuzzify(cooling, aggregated)
 
     print(f"Recommended Cooling Level: {cooling_level:.2f} %")
+
+    # Cooling category (compare crisp output to membership functions)
+    cooling_memberships = {
+        "Off": mf.trap(cooling_level, 0, 0, 5, 15),
+        "Low": mf.tri(cooling_level, 10, 25, 40),
+        "Medium": mf.tri(cooling_level, 35, 55, 75),
+        "High": mf.trap(cooling_level, 70, 85, 100, 100)
+    }
+
+    cool_cat = dominant_category("Cooling", cooling_memberships)
+
+    print(f"Recommended Cooling Level: {cooling_level:.2f} % ({cool_cat})")
