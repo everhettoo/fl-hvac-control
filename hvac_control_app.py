@@ -1,7 +1,5 @@
 import numpy as np
-""" Membership Functions """
-from mylibs.triangular_mem import tri
-from mylibs.trapeziod_mem import trap
+import mylibs.membership_functions as mf
 
 """ Universe of Discourse """
 # input variables
@@ -11,68 +9,93 @@ co2 = np.linspace(300, 1600, 500)
 # output variables
 cooling = np.linspace(0, 100, 400)
 
-""" Fuzzy Sets Definition """
-# Indoor Temperature
-def temp_low(x):
-    return trap(x, 18, 18.5, 21.5, 22.5)
-def temp_med(x):
-    return tri(x, 21, 23.5, 26)
-def temp_high(x):
-    return trap(x, 25, 26, 29, 40)
 
-# Indoor Humidity
-def humid_low(x):
-    return trap(x, 25, 30, 40, 45)
-def humid_med(x):
-    return tri(x, 40, 52.5, 65)
-def humid_high(x):
-    return trap(x, 60, 65, 80, 85)
+""" Membership Design """
+temp = np.linspace(16, 30, 400)
+cold_temp = np.array([mf.trap(x, 16, 16, 18,22) for x in temp])
+comfortable_temp = np.array([mf.tri(x, 20, 23, 26) for x in temp])
+warm_temp = np.array([mf.trap(x, 24, 27, 30, 30) for x in temp])
 
-# CO2 Concentration
-def co2_low(x):
-    return trap(x, 300, 400, 600, 700)
-def co2_med(x):
-    return tri(x, 600, 850, 1100)
-def co2_high(x):
-    return trap(x, 1000, 1150, 1450, 1600)
+humid = np.linspace(30, 80, 400)
+dry_humid = np.array([mf.trap(x, 30, 30, 35, 45) for x in humid])
+normal_humid = np.array([mf.tri(x, 40, 55, 70) for x in humid])
+high_humid = np.array([mf.trap(x, 60, 70, 80, 80) for x in humid])
 
-# Cooling levels
-def cooling_off(x):
-    return np.array([trap(val, 0, 0, 15, 25) for val in np.atleast_1d(x)])
-def cooling_low(x):
-    return np.array([tri(x, 20, 25, 40) for x in np.atleast_1d(x)])
-def cooling_med(x):
-    return np.array([tri(x, 40, 60, 70) for x in np.atleast_1d(x)])
-def cooling_high(x):
-    return np.array([trap(x, 70, 80, 100, 100) for x in np.atleast_1d(x)])
+co2 = np.linspace(400, 1500, 400)
+low_co2 = np.array([mf.trap(x, 400, 400, 600, 800) for x in co2])
+medium_co2 = np.array([mf.tri(x, 700, 950, 1200) for x in co2])
+high_co2 = np.array([mf.trap(x, 1000, 1200, 1500, 1500) for x in co2])
+
+cooling = np.linspace(0, 100, 400)
+off_cool = np.array([mf.trap(x, 0, 0, 5, 15) for x in cooling])
+low_cool = np.array([mf.tri(x, 10, 25, 40) for x in cooling])
+medium_cool = np.array([mf.tri(x, 35, 55, 75) for x in cooling])
+high_cool = np.array([mf.trap(x, 70, 85, 100, 100) for x in cooling])
+
+
+""" Fuzzification Membership Functions """
+in_cold_temp = 0
+in_comfortable_temp = 0
+in_warm_temp = 0
+
+def fuzzify_temp(x):
+    global in_cold_temp, in_comfortable_temp, in_warm_temp
+    in_cold_temp = mf.trap(x, 16, 16, 18, 22)
+    in_comfortable_temp = mf.tri(x, 20, 23, 26)
+    in_warm_temp = mf.trap(x, 24, 27, 30, 30)
+
+in_dry_humid = 0
+in_normal_humid = 0
+in_high_humid = 0
+
+def fuzzify_humid(x):
+    global in_dry_humid, in_normal_humid, in_high_humid
+    in_dry_humid = mf.trap(x, 30, 30, 35, 45)
+    in_normal_humid = mf.tri(x, 40, 55, 70)
+    in_high_humid = mf.trap(x, 60, 70, 80, 80)
+
+in_low_co2 = 0
+in_medium_co2 = 0
+in_high_co2 = 0
+
+def fuzzify_co2(x):
+    global in_low_co2, in_medium_co2, in_high_co2
+    in_low_co2 = mf.trap(x, 400, 400, 600, 800)
+    in_medium_co2 = mf.tri(x, 700, 950, 1200)
+    in_high_co2 = mf.trap(x, 1000, 1200, 1500, 1500)
+
 
 """ Rules Evaluation and Defuzzification """
-def evaluate_rules(temp_val, humid_val, co2_val, universe):
-    # Fuzzify inputs (scalar membership degrees)
-    T_low = temp_low(temp_val)
-    T_med = temp_med(temp_val)
-    T_high = temp_high(temp_val)
+def evaluate_rules():
+    # R1 : If Temp is Cold, THEN Cooling is Off
+    R1 = np.fmin(in_cold_temp, off_cool)
 
-    H_low = humid_low(humid_val)
-    H_med = humid_med(humid_val)
-    H_high = humid_high(humid_val)
+    # R2 : If Humidity is high and Temp is Warm, THEN Cooling is High
+    ant = np.min([in_high_humid, in_warm_temp])
+    R2 = np.fmin(ant, high_cool)
 
-    C_low = co2_low(co2_val)
-    C_med = co2_med(co2_val)
-    C_high = co2_high(co2_val)
+    # R3 : If CO2 is High and Temp is Warm, THEN Cooling is High
+    ant = np.min([in_high_co2, in_warm_temp])
+    R3 = np.fmin(ant, high_cool)
 
-    # Rule outputs (apply min for AND, clip output membership functions)
-    rule1 = np.minimum(C_low, cooling_off(universe))                  # CO2 Low → AC Off
-    rule2 = np.minimum(np.minimum(C_med, T_med), cooling_low(universe))   # CO2 Med & Temp Comfortable → AC Low
-    rule3 = np.minimum(np.minimum(C_med, T_high), cooling_med(universe))  # CO2 Med & Temp Warm → AC Medium
-    rule4 = np.minimum(np.minimum(C_high, T_med), cooling_high(universe)) # CO2 High & Temp Comfortable → AC High
-    rule5 = np.minimum(np.minimum(C_high, H_high), cooling_high(universe))# CO2 High & Humid High → AC High
-    rule6 = np.minimum(np.minimum(C_med, H_high), cooling_med(universe))  # CO2 Med & Humid High → AC Medium
-    rule7 = np.minimum(np.minimum(C_low, T_high), cooling_low(universe))  # CO2 Low & Temp Warm → AC Low
+    # R4 : If CO2 is Medium and Temp is Warm, THEN Cooling is Medium
+    ant = np.min([in_medium_co2, in_warm_temp])
+    R4 = np.fmin(ant, medium_cool)
 
-    # Aggregate all rule outputs (apply max for OR)
-    aggregated = np.maximum.reduce([rule1, rule2, rule3, rule4, rule5, rule6, rule7])
-    return aggregated
+    # R5 : If CO2 is Medium and Temp is Comfortable, THEN Cooling is Low
+    ant = np.min([in_medium_co2, in_comfortable_temp])
+    R5 = np.fmin(ant, low_cool)
+
+    # R6 : If CO2 is Low and Temp is Warm, THEN Cooling is Low
+    ant = np.min([in_low_co2, in_warm_temp])
+    R6 = np.fmin(ant, low_cool)
+
+    # R7 : If CO2 is Low and Temp is Comfortable and Humidity is Normal, THEN Cooling is Medium
+    ant = np.min([in_low_co2, in_comfortable_temp, in_normal_humid])
+    R7 = np.fmin(ant, medium_cool)
+
+    return np.fmax(R1, np.fmax(R2, np.fmax(R3, np.fmax(R4, np.fmax(R5, np.fmax(R6, R7))))))
+
 
 """ Defuzzification (Centroid) """
 def defuzzify(universe, aggregated):
@@ -80,71 +103,29 @@ def defuzzify(universe, aggregated):
         return 0.0
     return np.sum(universe * aggregated) / np.sum(aggregated)
 
-""" Input Validation """
-def validate_input(value, universe, name):
-    if value < universe.min() or value > universe.max():
-        raise ValueError(f"{name} value {value} is out of universe range ({universe.min()}–{universe.max()})")
 
 if __name__ == "__main__":
     print("HVAC Control System using Fuzzy Logic")
 
     # Sample input values
-    input_temp = 30.0   # Current indoor temperature in °C
-    input_humid = 55.0  # Current indoor humidity in %
-    input_co2 = 900.0   # Current CO2 concentration in ppm
-
-    # Validate inputs
-    validate_input(input_temp, temp, "Temperature")
-    validate_input(input_humid, humid, "Humidity")
-    validate_input(input_co2, co2, "CO₂")
-
-    # Fuzzify inputs
-    temp_memberships = {
-        "LOW": temp_low(input_temp),
-        "MEDIUM": temp_med(input_temp),
-        "HIGH": temp_high(input_temp)
-    }
-    humid_memberships = {
-        "LOW": humid_low(input_humid),
-        "MEDIUM": humid_med(input_humid),
-        "HIGH": humid_high(input_humid)
-    }
-    co2_memberships = {
-        "LOW": co2_low(input_co2),
-        "MEDIUM": co2_med(input_co2),
-        "HIGH": co2_high(input_co2)
-    }
-    temp_category = max(temp_memberships, key=temp_memberships.get)
-    humid_category = max(humid_memberships, key=humid_memberships.get)
-    co2_category = max(co2_memberships, key=co2_memberships.get)
+    in_temp = 21.5   # Current indoor temperature in °C
+    in_humid = 42  # Current indoor humidity in %
+    in_co2 = 600   # Current CO2 concentration in ppm
 
     # Print inputs with categories
-    print(f"Input Temperature: {input_temp:.1f} °C → {temp_category}")
-    print(f"Input Humidity: {input_humid:.1f} % → {humid_category}")
-    print(f"Input CO₂: {input_co2:.1f} ppm → {co2_category}")
+    print(f"Input Temperature: {in_temp:.1f} °C")
+    print(f"Input Humidity: {in_humid:.1f}")
+    print(f"Input CO₂: {in_co2:.1f} ppm")
 
-    # Rule evaluation
-    aggregated = evaluate_rules(input_temp, input_humid, input_co2, cooling)
+    # Fuzzification
+    fuzzify_temp(in_temp)
+    fuzzify_humid(in_humid)
+    fuzzify_co2(in_co2)
+
+    # Rules Evaluation
+    aggregated = evaluate_rules()
 
     # Defuzzification
     cooling_level = defuzzify(cooling, aggregated)
 
-    # Membership degrees of the crisp output
-    mu_off = cooling_off(cooling_level)[0]
-    mu_low = cooling_low(cooling_level)[0]
-    mu_med = cooling_med(cooling_level)[0]
-    mu_high = cooling_high(cooling_level)[0]
-
-    # Put them in a dictionary for easy handling
-    memberships = {
-        "OFF": mu_off,
-        "LOW": mu_low,
-        "MEDIUM": mu_med,
-        "HIGH": mu_high
-    }
-
-    # Find the fuzzy set with the highest membership
-    dominant_label = max(memberships, key=memberships.get)
-
     print(f"Recommended Cooling Level: {cooling_level:.2f} %")
-    print(f"👉 Dominant Fuzzy Set: {dominant_label}")
