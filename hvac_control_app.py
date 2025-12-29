@@ -92,7 +92,7 @@ def evaluate_rules():
 
     # R7 : If CO2 is Low and Temp is Comfortable and Humidity is Normal, THEN Cooling is Medium
     ant = np.min([in_low_co2, in_comfortable_temp, in_normal_humid])
-    R7 = np.fmin(ant, medium_cool)
+    R7 = np.fmin(ant, off_cool)
 
     return np.fmax(R1, np.fmax(R2, np.fmax(R3, np.fmax(R4, np.fmax(R5, np.fmax(R6, R7))))))
 
