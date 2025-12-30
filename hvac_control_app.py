@@ -36,15 +36,18 @@ in_cold_temp = 0
 in_comfortable_temp = 0
 in_warm_temp = 0
 
+
 def fuzzify_temp(x):
     global in_cold_temp, in_comfortable_temp, in_warm_temp
     in_cold_temp = mf.trap(x, 18, 18, 20, 22)  # take middle point of the trap
     in_comfortable_temp = mf.tri(x, 20, 23.5, 27)  # take middle point of the tri
     in_warm_temp = mf.trap(x, 25, 27, 30, 30)  # take middle point of the trap
 
+
 in_dry_humid = 0
 in_normal_humid = 0
 in_high_humid = 0
+
 
 def fuzzify_humid(x):
     global in_dry_humid, in_normal_humid, in_high_humid
@@ -52,9 +55,11 @@ def fuzzify_humid(x):
     in_normal_humid = mf.tri(x, 40, 52.5, 65)  # take middle point of the tri
     in_high_humid = mf.trap(x, 60, 70, 80, 80)  # take middle point of the trap
 
+
 in_low_co2 = 0
 in_medium_co2 = 0
 in_high_co2 = 0
+
 
 def fuzzify_co2(x):
     global in_low_co2, in_medium_co2, in_high_co2
@@ -64,6 +69,8 @@ def fuzzify_co2(x):
 
 
 """ Rules Evaluation and Defuzzification """
+
+
 def evaluate_rules():
     antecedent_1 = min(in_comfortable_temp, in_normal_humid, in_low_co2)
     antecedent_2 = min(in_comfortable_temp, in_normal_humid, in_medium_co2)
@@ -94,17 +101,13 @@ def evaluate_rules():
         ]
     )
 
-""" Defuzzification (Centroid) """
-def defuzzify(universe, r):
-    if np.sum(r) == 0:
-        return 0.0
-    return np.trapz(r * universe, universe) / np.trapz(r, universe)
 
 def dominant_category(name, memberships):
     # memberships is a dict {category: value}
     dominant = max(memberships, key=memberships.get)
     print(f"{name} Category: {dominant} (μ={memberships[dominant]:.2f})")
     return dominant
+
 
 def hvac_control_app(in_temp=None, in_humid=None, in_co2=None):
     print("HVAC Control System using Fuzzy Logic")
@@ -123,18 +126,14 @@ def hvac_control_app(in_temp=None, in_humid=None, in_co2=None):
     temp_memberships = {
         "Cold": in_cold_temp,
         "Comfortable": in_comfortable_temp,
-        "Warm": in_warm_temp
+        "Warm": in_warm_temp,
     }
     humid_memberships = {
         "Dry": in_dry_humid,
         "Normal": in_normal_humid,
-        "High": in_high_humid
+        "High": in_high_humid,
     }
-    co2_memberships = {
-        "Low": in_low_co2,
-        "Medium": in_medium_co2,
-        "High": in_high_co2
-    }
+    co2_memberships = {"Low": in_low_co2, "Medium": in_medium_co2, "High": in_high_co2}
 
     # Show dominant categories
     temp_cat = dominant_category("Temperature", temp_memberships)
@@ -154,7 +153,7 @@ def hvac_control_app(in_temp=None, in_humid=None, in_co2=None):
         "Off": mf.trap(res, 0, 0, 5, 15),
         "Low": mf.tri(res, 10, 25, 40),
         "Medium": mf.tri(res, 35, 55, 75),
-        "High": mf.trap(res, 70, 85, 100, 100)
+        "High": mf.trap(res, 70, 85, 100, 100),
     }
 
     res_cat = dominant_category("Cooling", cooling_memberships)
@@ -171,7 +170,9 @@ def hvac_control_app(in_temp=None, in_humid=None, in_co2=None):
     plt.plot(temp, comfortable_temp, label="Comfortable")
     plt.plot(temp, warm_temp, label="Warm")
 
-    plt.scatter([in_temp, in_temp, in_temp], [in_cold_temp, in_comfortable_temp, in_warm_temp])
+    plt.scatter(
+        [in_temp, in_temp, in_temp], [in_cold_temp, in_comfortable_temp, in_warm_temp]
+    )
     plt.xlabel("Temperature")
     plt.title(f"Input Temperature Fuzzification: {in_temp:.1f} °C")
     plt.legend()
@@ -181,7 +182,9 @@ def hvac_control_app(in_temp=None, in_humid=None, in_co2=None):
     plt.plot(humid, normal_humid, label="Normal")
     plt.plot(humid, high_humid, label="High")
 
-    plt.scatter([in_humid, in_humid, in_humid], [in_dry_humid, in_normal_humid, in_high_humid])
+    plt.scatter(
+        [in_humid, in_humid, in_humid], [in_dry_humid, in_normal_humid, in_high_humid]
+    )
     plt.xlabel("Humidity")
     plt.title(f"Input Humidity Fuzzification: {in_humid:.1f} %")
     plt.legend()
@@ -201,16 +204,17 @@ def hvac_control_app(in_temp=None, in_humid=None, in_co2=None):
     plt.plot(cooling, low_cool, label="Low")
     plt.plot(cooling, medium_cool, label="Medium")
     plt.plot(cooling, high_cool, label="High")
-    plt.fill_between(cooling, np.zeros_like(cooling), r, color='orange', alpha=0.7)
-    plt.scatter([res], [0], color='red', label="Defuzzified Output")
+    plt.fill_between(cooling, np.zeros_like(cooling), r, color="orange", alpha=0.7)
+    plt.scatter([res], [0], color="red", label="Defuzzified Output")
     plt.xlabel("Cooling Level")
     plt.title("Defuzzification using Centroid Method")
     plt.legend()
     plt.show()
 
+
 if __name__ == "__main__":
     # # Sample input values
-    in_temp = 21.5   # Current indoor temperature in °C
+    in_temp = 21.5  # Current indoor temperature in °C
     in_humid = 42  # Current indoor humidity in %
-    in_co2 = 600   # Current CO2 concentration in ppm
+    in_co2 = 600  # Current CO2 concentration in ppm
     hvac_control_app(in_temp, in_humid, in_co2)

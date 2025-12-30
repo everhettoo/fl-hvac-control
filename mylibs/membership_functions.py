@@ -107,7 +107,23 @@ Defuzzification using the Centroid (Center of Gravity) method.
 """
 
 
-def defuzzify(universe, aggregated):
+def defuzzify_centroid(universe, aggregated):
     if np.sum(aggregated) == 0:
         return 0.0
     return np.sum(universe * aggregated) / np.sum(aggregated)
+
+
+"""
+Defuzzification using Trapezoidal method.
+    Parameters:
+        universe (array-like): Discrete universe of discourse (x-axis values).
+        r (array-like): Aggregated membership values (y-axis values).
+    Returns:
+        float: Crisp output value representing the defuzzified result.
+"""
+
+
+def defuzzify_trap(universe, r):
+    if np.sum(r) == 0:
+        return 0.0
+    return np.trapz(r * universe, universe) / np.trapz(r, universe)
