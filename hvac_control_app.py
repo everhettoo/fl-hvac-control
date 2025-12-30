@@ -65,35 +65,34 @@ def fuzzify_co2(x):
 
 """ Rules Evaluation and Defuzzification """
 def evaluate_rules():
-    # R1: If CO2 is Low -> Cooling Off
-    r1 = np.fmin(in_low_co2, off_cool)
+    antecedent_1 = min(in_comfortable_temp, in_normal_humid, in_low_co2)
+    antecedent_2 = min(in_comfortable_temp, in_normal_humid, in_medium_co2)
+    antecedent_3 = min(in_cold_temp, in_normal_humid)
+    antecedent_4 = min(in_warm_temp, in_normal_humid)
+    antecedent_5 = in_high_humid
+    antecedent_6 = in_high_co2
+    antecedent_7 = min(in_warm_temp, in_high_humid, in_high_co2)
 
-    # R2: If CO2 is Medium AND Temp is Comfortable -> Cooling Low
-    ant = np.min([in_medium_co2, in_comfortable_temp])
-    r2 = np.fmin(ant, low_cool)
-
-    # R3: If CO2 is Medium AND Temp is Warm -> Cooling Medium
-    ant = np.min([in_medium_co2, in_warm_temp])
-    r3 = np.fmin(ant, medium_cool)
-
-    # R4: If CO2 is High AND Temp is Warm -> Cooling High
-    ant = np.min([in_high_co2, in_warm_temp])
-    r4 = np.fmin(ant, high_cool)
-
-    # R5: If CO2 is High AND Humidity is High -> Cooling High
-    ant = np.min([in_high_co2, in_high_humid])
-    r5 = np.fmin(ant, high_cool)
-
-    # R6: If CO2 is Medium AND Humidity is High -> Cooling Medium
-    ant = np.min([in_medium_co2, in_high_humid])
-    r6 = np.fmin(ant, medium_cool)
-
-    # R7 (NEW): If CO2 is High AND Temp is Comfortable -> Cooling Medium
-    ant = np.min([in_high_co2, in_comfortable_temp])
-    r7 = np.fmin(ant, medium_cool)
+    consequence_1 = np.minimum(antecedent_1, off_cool)
+    consequence_2 = np.minimum(antecedent_2, low_cool)
+    consequence_3 = np.minimum(antecedent_3, low_cool)
+    consequence_4 = np.minimum(antecedent_4, medium_cool)
+    consequence_5 = np.minimum(antecedent_5, medium_cool)
+    consequence_6 = np.minimum(antecedent_6, high_cool)
+    consequence_7 = np.minimum(antecedent_7, high_cool)
 
     # Aggregate
-    return np.fmax(r1, np.fmax(r2, np.fmax(r3, np.fmax(r4, np.fmax(r5, np.fmax(r6, r7))))))
+    return np.maximum.reduce(
+        [
+            consequence_1,
+            consequence_2,
+            consequence_3,
+            consequence_4,
+            consequence_5,
+            consequence_6,
+            consequence_7,
+        ]
+    )
 
 """ Defuzzification (Centroid) """
 def defuzzify(universe, r):
@@ -166,7 +165,7 @@ def hvac_control_app(in_temp=None, in_humid=None, in_co2=None):
     print(f" - CO₂: {in_co2:.1f} ppm ({co2_cat})")
     print(f"Recommended Cooling Level: {res:.2f} % ({res_cat})")
 
-    plt.figure(0, figsize=(15, 10))
+    plt.figure(0, figsize=(12, 6))
     plt.subplot(1, 3, 1)
     plt.plot(temp, cold_temp, label="Cold")
     plt.plot(temp, comfortable_temp, label="Comfortable")
@@ -197,7 +196,7 @@ def hvac_control_app(in_temp=None, in_humid=None, in_co2=None):
     plt.title(f"Input CO₂ Fuzzification: {in_co2:.1f} ppm")
     plt.legend()
 
-    plt.figure(1, figsize=(15, 10))
+    plt.figure(1, figsize=(12, 6))
     plt.plot(cooling, off_cool, label="Off")
     plt.plot(cooling, low_cool, label="Low")
     plt.plot(cooling, medium_cool, label="Medium")
