@@ -1,17 +1,19 @@
 import unittest
+
 import numpy as np
-from mylibs.decreasing_mem import dec
+
+from mylibs.membership_functions import mf
 
 
 class TestDecreasingMembershipFunction(unittest.TestCase):
 
     def test_returns_one_when_x_less_than_or_equal_to_a(self):
-        self.assertEqual(dec(5, 10, 20), 1)
-        self.assertEqual(dec(10, 10, 20), 1)
+        self.assertEqual(mf.dec(5, 10, 20), 1)
+        self.assertEqual(mf.dec(10, 10, 20), 1)
         self.assertEqual(dec(-100, 0, 100), 1)
 
     def test_returns_zero_when_x_greater_than_or_equal_to_b(self):
-        self.assertEqual(dec(25, 10, 20), 0)
+        self.assertEqual(mf.dec(25, 10, 20), 0)
         self.assertEqual(dec(20, 10, 20), 0)
         self.assertEqual(dec(1000, 0, 100), 0)
 
@@ -33,7 +35,7 @@ class TestDecreasingMembershipFunction(unittest.TestCase):
 
     def test_handles_decimal_values(self):
         self.assertAlmostEqual(dec(2.5, 1.0, 4.0), 0.5)
-        self.assertAlmostEqual(dec(1.5, 1.0, 4.0), 5/6, places=5)
+        self.assertAlmostEqual(dec(1.5, 1.0, 4.0), 5 / 6, places=5)
 
     def test_handles_very_small_interval(self):
         result = dec(1.0001, 1.0, 1.0002)
@@ -135,6 +137,7 @@ class TestDecreasingMembershipFunction(unittest.TestCase):
 
     def test_output_is_complement_of_increasing_function(self):
         from mylibs.increasing_mem import inc
+
         a, b = 10, 20
         test_values = [5, 10, 15, 20, 25]
         for x in test_values:
@@ -150,4 +153,3 @@ class TestDecreasingMembershipFunction(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
