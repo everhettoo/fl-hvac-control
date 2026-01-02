@@ -25,10 +25,10 @@ low_co2 = np.array([mf.trap(x, 400, 400, 500, 600) for x in co2])
 medium_co2 = np.array([mf.tri(x, 500, 800, 1100) for x in co2])
 high_co2 = np.array([mf.trap(x, 1000, 1250, 1500, 1500) for x in co2])
 
-off_cool = np.array([mf.trap(x, 0, 0, 5, 15) for x in hvac])
-low_cool = np.array([mf.tri(x, 10, 25, 40) for x in hvac])
-medium_cool = np.array([mf.tri(x, 35, 55, 75) for x in hvac])
-high_cool = np.array([mf.trap(x, 70, 85, 100, 100) for x in hvac])
+off_hvac = np.array([mf.trap(x, 0, 0, 5, 15) for x in hvac])
+low_hvac = np.array([mf.tri(x, 10, 25, 40) for x in hvac])
+medium_hvac = np.array([mf.tri(x, 35, 55, 75) for x in hvac])
+high_hvac = np.array([mf.trap(x, 70, 85, 100, 100) for x in hvac])
 
 
 """ Fuzzification Membership Functions """
@@ -80,13 +80,13 @@ def evaluate_rules():
     antecedent_6 = in_high_co2
     antecedent_7 = min(in_warm_temp, in_high_humid, in_high_co2)
 
-    consequence_1 = np.minimum(antecedent_1, off_cool)
-    consequence_2 = np.minimum(antecedent_2, low_cool)
-    consequence_3 = np.minimum(antecedent_3, low_cool)
-    consequence_4 = np.minimum(antecedent_4, medium_cool)
-    consequence_5 = np.minimum(antecedent_5, medium_cool)
-    consequence_6 = np.minimum(antecedent_6, high_cool)
-    consequence_7 = np.minimum(antecedent_7, high_cool)
+    consequence_1 = np.minimum(antecedent_1, off_hvac)
+    consequence_2 = np.minimum(antecedent_2, low_hvac)
+    consequence_3 = np.minimum(antecedent_3, low_hvac)
+    consequence_4 = np.minimum(antecedent_4, medium_hvac)
+    consequence_5 = np.minimum(antecedent_5, medium_hvac)
+    consequence_6 = np.minimum(antecedent_6, high_hvac)
+    consequence_7 = np.minimum(antecedent_7, high_hvac)
 
     # Aggregate
     return np.maximum.reduce(
@@ -150,14 +150,12 @@ def hvac_control_app(in_temp=None, in_humid=None, in_co2=None):
     # Defuzzification
     res = mf.defuzzify_trap(hvac, r)
 
-    print(f"Recommended HVAC Level: {res:.2f} %")
-
     # HVAC category (compare crisp output to membership functions)
     hvac_memberships = {
-        "Off": mf.trap(res, 0, 0, 5, 15),
-        "Low": mf.tri(res, 10, 25, 40),
-        "Medium": mf.tri(res, 35, 55, 75),
-        "High": mf.trap(res, 70, 85, 100, 100),
+        "Off":np.max(np.minimum(r, off_hvac)),
+        "Low": np.max(np.minimum(r, low_hvac)),
+        "Medium": np.max(np.minimum(r, medium_hvac)),
+        "High": np.max(np.minimum(r, high_hvac)),
     }
 
     res_cat = dominant_category("HVAC", hvac_memberships)
@@ -204,10 +202,10 @@ def hvac_control_app(in_temp=None, in_humid=None, in_co2=None):
     plt.legend()
 
     plt.figure(1, figsize=(12, 6))
-    plt.plot(hvac, off_cool, label="Off", color="skyblue")
-    plt.plot(hvac, low_cool, label="Low", color="green")
-    plt.plot(hvac, medium_cool, label="Medium", color="orange")
-    plt.plot(hvac, high_cool, label="High", color="red")
+    plt.plot(hvac, off_hvac, label="Off", color="skyblue")
+    plt.plot(hvac, low_hvac, label="Low", color="green")
+    plt.plot(hvac, medium_hvac, label="Medium", color="orange")
+    plt.plot(hvac, high_hvac, label="High", color="red")
     plt.fill_between(hvac, np.zeros_like(hvac), r, color="orange", alpha=0.7)
     plt.scatter([res], [0], color="red", label="Defuzzified Output")
     plt.xlabel("HVAC Level")
