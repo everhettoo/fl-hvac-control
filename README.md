@@ -65,12 +65,6 @@ python -c "from main import hvac_control_app; hvac_control_app(24.0, 50.0, 900.0
 This runs the app for temperature=24.0 °C, humidity=50.0 %, CO₂=900 ppm and will produce the same printed output and plots.
 
 ## Testing
-Run the unit tests with pytest from the repository root (venv activated):
-
-```powershell
-pip install -r requirements.txt; pytest -q
-```
-
 The `tests/` directory contains tests for the membership function implementations.
 
 ## Troubleshooting
