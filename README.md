@@ -67,6 +67,8 @@ This runs the app for temperature=24.0 °C, humidity=50.0 %, CO₂=900 ppm and w
 ## Testing
 The `tests/` directory contains tests for the membership function implementations.
 
+```python -m unittest discover -s tests```
+
 ## Troubleshooting
 - Module import errors: Ensure you run commands from the repository root so Python finds the `mylibs` package, and that the virtual environment is activated.
 - Missing packages: Verify installation with `pip list` and `pip install -r requirements.txt`.

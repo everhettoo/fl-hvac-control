@@ -1,4 +1,15 @@
+import os
+
+# Imports necessary modules/packages and sets up the environment for experimentation.
+import sys
 import unittest
+from importlib import reload
+
+# Navigate up to the project root directory dynamically.
+project_root = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
+
+# Add the project root to the system path to import custom modules from mylibs package.
+sys.path.append(project_root)
 
 import numpy as np
 

@@ -126,4 +126,4 @@ Defuzzification using Trapezoidal method.
 def defuzzify_trap(universe, r):
     if np.sum(r) == 0:
         return 0.0
-    return np.trapz(r * universe, universe) / np.trapz(r, universe)
+    return np.trapezoid(r * universe, universe) / np.trapezoid(r, universe)

@@ -133,11 +133,7 @@ def hvac_control_app(in_temp=None, in_humid=None, in_co2=None):
         "Normal": in_normal_humid,
         "High": in_high_humid,
     }
-    co2_memberships = {
-        "Low": in_low_co2,
-        "Medium": in_medium_co2,
-        "High": in_high_co2
-    }
+    co2_memberships = {"Low": in_low_co2, "Medium": in_medium_co2, "High": in_high_co2}
 
     # Show dominant categories
     temp_cat = dominant_category("Temperature", temp_memberships)
@@ -148,11 +144,12 @@ def hvac_control_app(in_temp=None, in_humid=None, in_co2=None):
     r = evaluate_rules()
 
     # Defuzzification
-    res = mf.defuzzify_trap(hvac, r)
+    # res = mf.defuzzify_trap(hvac, r)
+    res = mf.defuzzify_centroid(hvac, r)
 
     # HVAC category (compare crisp output to membership functions)
     hvac_memberships = {
-        "Off":np.max(np.minimum(r, off_hvac)),
+        "Off": np.max(np.minimum(r, off_hvac)),
         "Low": np.max(np.minimum(r, low_hvac)),
         "Medium": np.max(np.minimum(r, medium_hvac)),
         "High": np.max(np.minimum(r, high_hvac)),
