@@ -1,27 +1,8 @@
 # Fuzzy Logic HVAC Control
-A simple HVAC controller implemented with fuzzy logic (Mamdani-style). The project contains notebooks to explore membership functions and a small Python application that demonstrates the controller with plots and printed summaries.
-
-## Prerequisites
-- Python 3.8+ (development used Python 3.12.9). Ensure Python is on your PATH.
-- (Optional but recommended) Create and use a virtual environment to avoid polluting the system Python.
-
-## Quick setup
-From the repository root (Windows PowerShell):
-
-```powershell
-# Create and activate a venv (Windows PowerShell)
-python -m venv venv; .\venv\Scripts\Activate.ps1
-# Install required packages
-pip install -r requirements.txt
-```
-
-If you're using cmd.exe instead of PowerShell, activate the venv with:
-
-```powershell
-venv\Scripts\activate
-```
+A simple fuzzy logic HVAC controller implementation using Mamdani model. The project contains notebooks to explore membership functions and a small Python application that demonstrates the controller with plots and printed summaries.
 
 ## Project structure
+The project contains the following structure.
 - `main.py` — Example script to run the HVAC controller and produce plots and a printed summary.
 - `mylibs/` — Package with membership functions and helper utilities:
   - `mylibs/membership_functions.py` — increasing/decreasing/triangular/trapezoidal/gaussian/sigmoid membership functions and defuzzification helpers.
@@ -30,21 +11,33 @@ venv\Scripts\activate
   - `2_explore_humidity_membership.ipynb` — explore humidity membership functions and shapes.
   - `3_explore_co2_membership.ipynb` — explore CO₂ membership functions and thresholds.
   - `4_explore_hvac_membership.ipynb` — defines the HVAC output membership functions and visualizes them.
-  - `5_mamdani_hvac_control.ipynb` — step-by-step Mamdani controller setup and rule visualization.
-  - `6_hvac_verification.ipynb` — verification and sample runs comparing fuzzy output to expected behaviour.
-- `tests/` — Unit tests for the membership functions (pytest).
+  - `5_mamdani_hvac_control.ipynb` — a Mamdani FLS development: membership function definition, fuzzification, rule-evaluation, and defuzzification..
+  - `6_hvac_verification.ipynb` — includes the tests for: optimized rules, overlapping membership, and exception cases..
+- `tests/` — Unit tests for the membership functions.
 - `requirements.txt` — Python package dependencies.
 
-## Run: for observation
-This section gives a few practical ways to run the example application and observe results (plots + printed summary).
+## Prerequisites
+- Python 3.8+ (development used Python 3.12.9). Ensure Python is on your PATH.
 
-1) Run the interactive example script (recommended)
+## Clone & setup
+From the repository root:
 
-Open PowerShell from the repository root (venv activated) and run:
+1.	Clone the project to local: ```git clone git@github.com:everhettoo/fl-hvac-control.git```
+2.	Open the project using the preferred IDE (PyCharm or VSCode)
+3.	Create a virtual environment (if needed): ```python -m venv venv```
+4.	Activate the virtual environment: ```source venv/bin/activate``` (bash), or ```venv/Scripts/activate``` (Windows)
+5.	Install required packages: ```pip install -r requirements.txt```
 
-```powershell
-python main.py
-```
+## Two parts to Run:
+1. Jupyter Notebooks - to observe the development approach as explained earlier (run all notebooks for better understanding).
+2. HVAC Application - to run the HVAC controller python script.
+
+## Run: Jupyter Notebook
+1. Start jupyter server from the same terminal: ```jupyter notebook```
+2. Browse notebooks from browser: http://localhost:8888/tree
+
+## Run: Application
+```python main.py 21.5 55 600```
 
 Expected behaviour:
 - The script prints input summaries and dominant categories. Example lines might look like:
@@ -53,16 +46,6 @@ Expected behaviour:
   - "Temperature Category: Comfortable (μ=0.75)"
   - "Recommended HVAC Level: 42.00 % (Medium)"
 - Matplotlib windows will open showing fuzzification of inputs and the defuzzified HVAC output.
-
-2) Run with custom scalar inputs (no code edit required)
-
-You can call the main function from a one-liner in PowerShell:
-
-```powershell
-python -c "from main import hvac_control_app; hvac_control_app(24.0, 50.0, 900.0)"
-```
-
-This runs the app for temperature=24.0 °C, humidity=50.0 %, CO₂=900 ppm and will produce the same printed output and plots.
 
 ## Testing
 The `tests/` directory contains tests for the membership function implementations.

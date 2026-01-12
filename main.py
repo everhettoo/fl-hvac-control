@@ -1,3 +1,5 @@
+import sys
+
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -212,8 +214,19 @@ def hvac_control_app(in_temp=None, in_humid=None, in_co2=None):
 
 
 if __name__ == "__main__":
+    # Check if exactly 3 arguments (plus the script name) are provided.
+    if len(sys.argv) == 4:
+        arg1 = sys.argv[1]
+        arg2 = sys.argv[2]
+        arg3 = sys.argv[3]
+        print(f"Received arguments: {arg1}, {arg2}, {arg3}")
+    else:
+        print("Usage: python main.py <temp> <humidity> <co2> (no commas)")
+        sys.exit(1)  # Exit with an error code
+
     # # Sample input values
-    in_temp = 21.5  # Current indoor temperature in °C
-    in_humid = 42  # Current indoor humidity in %
-    in_co2 = 600  # Current CO2 concentration in ppm
+    in_temp = float(arg1)  # Current indoor temperature in °C
+    in_humid = float(arg2)  # Current indoor humidity in %
+    in_co2 = float(arg3)  # Current CO2 concentration in ppm
+
     hvac_control_app(in_temp, in_humid, in_co2)
